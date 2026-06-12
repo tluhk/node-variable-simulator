@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Node.js Variable Memory Simulator</title>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">JavaScript memory model</p>
+          <h1 id="page-title">Node.js Variable Memory Simulator</h1>
+          <p class="lede">
+            Step through small JavaScript examples and watch primitive values,
+            object references, stack frames, and heap objects change.
+          </p>
+        </div>
+        <div class="legend" aria-label="Visual legend">
+          <span><i class="dot primitive"></i>Primitive value</span>
+          <span><i class="dot reference"></i>Reference</span>
+          <span><i class="dot heap"></i>Heap object</span>
+        </div>
+      </section>
+
+      <section class="workspace" aria-label="Simulator workspace">
+        <aside class="scenario-panel" aria-label="Scenario selector">
+          <h2>Scenarios</h2>
+          <div id="scenarioList" class="scenario-list"></div>
+        </aside>
+
+        <section class="simulator">
+          <header class="simulator-header">
+            <div>
+              <p id="scenarioKicker" class="eyebrow"></p>
+              <h2 id="scenarioTitle"></h2>
+            </div>
+            <div class="controls" aria-label="Step controls">
+              <button id="prevBtn" type="button" aria-label="Previous step">Prev</button>
+              <button id="nextBtn" type="button" aria-label="Next step">Next</button>
+              <button id="resetBtn" type="button" aria-label="Reset scenario">Reset</button>
+            </div>
+          </header>
+
+          <div class="progress" aria-label="Scenario progress">
+            <div id="progressBar"></div>
+          </div>
+
+          <div class="content-grid">
+            <section class="code-panel" aria-labelledby="code-title">
+              <div class="panel-heading">
+                <h3 id="code-title">Code</h3>
+                <span id="stepCounter"></span>
+              </div>
+              <pre><code id="codeBlock"></code></pre>
+            </section>
+
+            <section class="memory-stage" aria-label="Memory visualization">
+              <div class="memory-column">
+                <div class="panel-heading">
+                  <h3>Call stack</h3>
+                  <span>bindings live here</span>
+                </div>
+                <div id="stackFrames" class="stack-frames"></div>
+              </div>
+
+              <div class="memory-column">
+                <div class="panel-heading">
+                  <h3>Heap</h3>
+                  <span>objects live here</span>
+                </div>
+                <div id="heapObjects" class="heap-objects"></div>
+              </div>
+            </section>
+
+            <section class="memory-table-panel" aria-labelledby="memory-table-title">
+              <div class="panel-heading">
+                <h3 id="memory-table-title">Conceptual memory table</h3>
+                <span>not physical addresses</span>
+              </div>
+              <div class="table-wrap">
+                <table class="memory-table">
+                  <thead>
+                    <tr>
+                      <th>Area</th>
+                      <th>Name</th>
+                      <th>Kind</th>
+                      <th>Holds</th>
+                    </tr>
+                  </thead>
+                  <tbody id="memoryRows"></tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+
+          <section class="explanation" aria-live="polite">
+            <h3 id="stepTitle"></h3>
+            <p id="stepExplanation"></p>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <script src="js/app.js"></script>
+  </body>
+</html>
