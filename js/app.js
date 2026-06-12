@@ -1264,6 +1264,9 @@ const uiText = {
     "basics.heap.item2": "Multiple bindings can reference the same heap object.",
     "basics.heap.item3": "Heap entries remain shown while some binding or closure still reaches them.",
     "learning.inScenario": "In this scenario",
+    "tabs.scenario": "Scenario",
+    "tabs.model": "Visual model",
+    "tabs.references": "References",
     "references.title": "References",
     "aria.workspace": "Simulator workspace",
     "aria.scenarioSelector": "Scenario selector",
@@ -1275,6 +1278,20 @@ const uiText = {
     "aria.legend": "Visual legend",
     "aria.memoryVisualization": "Memory visualization",
     "status.step": "Step {current} of {total}",
+    "status.scenario": "{current}/{total}",
+    "change.new-binding": "new binding",
+    "change.copy": "copy",
+    "change.reassign": "reassigned",
+    "change.mutate": "mutated",
+    "change.call": "function call",
+    "change.return": "return",
+    "change.allocate": "new object",
+    "change.closure": "closure",
+    "change.shadow": "shadowing",
+    "group.basics": "Basics",
+    "group.functions": "Functions",
+    "group.scope": "Scope",
+    "group.references": "References and copies",
     "empty.noStack": "No stack frames yet",
     "empty.noBindings": "No local bindings",
     "empty.noHeap": "No heap objects allocated",
@@ -1326,6 +1343,9 @@ const uiText = {
     "basics.heap.item2": "Mitu sidet võib viidata samale heap-objektile.",
     "basics.heap.item3": "Heap-kirjed jäävad nähtavale seni, kuni mõni side või sulund nendeni ulatub.",
     "learning.inScenario": "Selles stsenaariumis",
+    "tabs.scenario": "Stsenaarium",
+    "tabs.model": "Visuaalne mudel",
+    "tabs.references": "Viited",
     "references.title": "Viited",
     "aria.workspace": "Simulaatori tööala",
     "aria.scenarioSelector": "Stsenaariumi valik",
@@ -1337,6 +1357,20 @@ const uiText = {
     "aria.legend": "Visuaalne legend",
     "aria.memoryVisualization": "Mälu visualiseerimine",
     "status.step": "Samm {current}/{total}",
+    "status.scenario": "{current}/{total}",
+    "change.new-binding": "uus side",
+    "change.copy": "koopia",
+    "change.reassign": "ümber määratud",
+    "change.mutate": "muudetud",
+    "change.call": "funktsioonikutse",
+    "change.return": "tagastus",
+    "change.allocate": "uus objekt",
+    "change.closure": "sulund",
+    "change.shadow": "varjutamine",
+    "group.basics": "Põhitõed",
+    "group.functions": "Funktsioonid",
+    "group.scope": "Skoop",
+    "group.references": "Viited ja koopiad",
     "empty.noStack": "Stack-raame pole veel",
     "empty.noBindings": "Lokaalseid sidemeid pole",
     "empty.noHeap": "Heap-objekte pole loodud",
@@ -1351,13 +1385,47 @@ const uiText = {
 const state = {
   scenarioIndex: 0,
   stepIndex: 0,
-  language: "en"
+  language: "en",
+  activeLearningTab: "scenario"
 };
 
 const storageKey = "node-variable-simulator-state";
 
+const scenarioGroups = [
+  {
+    labelKey: "group.basics",
+    ids: ["primitive-copy", "object-reference", "primitive-vs-structure-reassign"]
+  },
+  {
+    labelKey: "group.functions",
+    ids: ["function-arguments", "closure"]
+  },
+  {
+    labelKey: "group.scope",
+    ids: ["const-binding", "variable-shadowing"]
+  },
+  {
+    labelKey: "group.references",
+    ids: ["mutation-vs-reassignment", "shallow-copy", "nested-references"]
+  }
+];
+
+const changeTypes = {
+  "primitive-copy": ["new-binding", "copy", "reassign"],
+  "object-reference": ["allocate", "copy", "mutate"],
+  "function-arguments": ["new-binding", "allocate", "call", "reassign", "mutate", "return"],
+  "const-binding": ["allocate", "mutate", "reassign"],
+  closure: ["call", "closure", "return", "mutate"],
+  "variable-shadowing": ["new-binding", "call", "shadow", "reassign", "return"],
+  "primitive-vs-structure-reassign": ["new-binding", "reassign", "allocate", "copy", "mutate", "reassign"],
+  "mutation-vs-reassignment": ["allocate", "copy", "mutate", "reassign"],
+  "shallow-copy": ["allocate", "copy", "copy", "mutate", "mutate"],
+  "nested-references": ["allocate", "copy", "mutate"]
+};
+
 const elements = {
   scenarioList: document.querySelector("#scenarioList"),
+  scenarioProgress: document.querySelector("#scenarioProgress"),
   scenarioKicker: document.querySelector("#scenarioKicker"),
   scenarioTitle: document.querySelector("#scenarioTitle"),
   codeBlock: document.querySelector("#codeBlock"),
@@ -1371,9 +1439,12 @@ const elements = {
   scenarioNotes: document.querySelector("#scenarioNotes"),
   stepTitle: document.querySelector("#stepTitle"),
   stepExplanation: document.querySelector("#stepExplanation"),
+  changeBadge: document.querySelector("#changeBadge"),
   stepCounter: document.querySelector("#stepCounter"),
   progressBar: document.querySelector("#progressBar"),
   languageOptions: document.querySelectorAll("[data-language]"),
+  learningTabs: document.querySelectorAll("[data-tab]"),
+  tabPanels: document.querySelectorAll(".tab-panel"),
   prevBtn: document.querySelector("#prevBtn"),
   nextBtn: document.querySelector("#nextBtn"),
   resetBtn: document.querySelector("#resetBtn")
@@ -1442,6 +1513,10 @@ function renderStaticText() {
     button.querySelector("strong").textContent = scenarioText.title;
     button.querySelector("span").textContent = scenarioText.summary;
   });
+
+  elements.scenarioList.querySelectorAll(".scenario-group-title").forEach((title) => {
+    title.textContent = t(title.dataset.groupKey);
+  });
 }
 
 function loadSavedState() {
@@ -1461,6 +1536,7 @@ function loadSavedState() {
     state.scenarioIndex = savedState.scenarioIndex;
     state.stepIndex = Math.min(Math.max(savedState.stepIndex || 0, 0), scenario.steps.length - 1);
     state.language = uiText[savedState.language] ? savedState.language : state.language;
+    state.activeLearningTab = savedState.activeLearningTab || state.activeLearningTab;
   } catch {
     try {
       localStorage.removeItem(storageKey);
@@ -1477,7 +1553,8 @@ function saveState() {
       JSON.stringify({
         scenarioIndex: state.scenarioIndex,
         stepIndex: state.stepIndex,
-        language: state.language
+        language: state.language,
+        activeLearningTab: state.activeLearningTab
       })
     );
   } catch {
@@ -1488,22 +1565,38 @@ function saveState() {
 function renderScenarioList() {
   elements.scenarioList.innerHTML = "";
 
-  scenarios.forEach((scenario, index) => {
-    const scenarioText = getScenarioText(scenario);
-    const button = document.createElement("button");
-    button.type = "button";
-    button.dataset.scenarioIndex = String(index);
-    button.className = `scenario-card${index === state.scenarioIndex ? " active" : ""}`;
-    button.innerHTML = `<strong></strong><span></span>`;
-    button.querySelector("strong").textContent = scenarioText.title;
-    button.querySelector("span").textContent = scenarioText.summary;
-    button.addEventListener("click", () => {
-      state.scenarioIndex = index;
-      state.stepIndex = 0;
-      saveState();
-      render();
+  scenarioGroups.forEach((group) => {
+    const groupEl = document.createElement("section");
+    groupEl.className = "scenario-group";
+
+    const title = document.createElement("h3");
+    title.className = "scenario-group-title";
+    title.dataset.groupKey = group.labelKey;
+    title.textContent = t(group.labelKey);
+    groupEl.append(title);
+
+    group.ids.forEach((scenarioId) => {
+      const index = scenarios.findIndex((scenario) => scenario.id === scenarioId);
+      const scenario = scenarios[index];
+      const scenarioText = getScenarioText(scenario);
+      const button = document.createElement("button");
+
+      button.type = "button";
+      button.dataset.scenarioIndex = String(index);
+      button.className = `scenario-card${index === state.scenarioIndex ? " active" : ""}`;
+      button.innerHTML = `<strong></strong><span></span>`;
+      button.querySelector("strong").textContent = scenarioText.title;
+      button.querySelector("span").textContent = scenarioText.summary;
+      button.addEventListener("click", () => {
+        state.scenarioIndex = index;
+        state.stepIndex = 0;
+        saveState();
+        render();
+      });
+      groupEl.append(button);
     });
-    elements.scenarioList.append(button);
+
+    elements.scenarioList.append(groupEl);
   });
 }
 
@@ -1512,6 +1605,26 @@ function updateScenarioListState() {
     const isActive = Number(button.dataset.scenarioIndex) === state.scenarioIndex;
     button.classList.toggle("active", isActive);
   });
+}
+
+function renderLearningTabs() {
+  elements.learningTabs.forEach((tab) => {
+    const isActive = tab.dataset.tab === state.activeLearningTab;
+    tab.classList.toggle("active", isActive);
+    tab.setAttribute("aria-selected", String(isActive));
+  });
+
+  elements.tabPanels.forEach((panel) => {
+    const isActive = panel.id === `panel${state.activeLearningTab[0].toUpperCase()}${state.activeLearningTab.slice(1)}`;
+    panel.classList.toggle("active", isActive);
+    panel.hidden = !isActive;
+  });
+}
+
+function renderChangeBadge(scenario) {
+  const changeType = changeTypes[scenario.id]?.[state.stepIndex] || "new-binding";
+  elements.changeBadge.textContent = t(`change.${changeType}`);
+  elements.changeBadge.dataset.change = changeType;
 }
 
 function renderCode(scenario, step) {
@@ -1683,6 +1796,8 @@ function render() {
   renderHeap(step);
   renderMemoryTable(step);
   renderLearningGuide(scenario);
+  renderLearningTabs();
+  renderChangeBadge(scenario);
 
   elements.scenarioKicker.textContent = scenarioText.kicker;
   elements.scenarioTitle.textContent = scenarioText.title;
@@ -1691,6 +1806,10 @@ function render() {
   elements.stepCounter.textContent = t("status.step", {
     current: state.stepIndex + 1,
     total: scenario.steps.length
+  });
+  elements.scenarioProgress.textContent = t("status.scenario", {
+    current: state.scenarioIndex + 1,
+    total: scenarios.length
   });
   elements.progressBar.style.width = `${((state.stepIndex + 1) / scenario.steps.length) * 100}%`;
 
@@ -1720,6 +1839,14 @@ elements.resetBtn.addEventListener("click", () => {
 elements.languageOptions.forEach((button) => {
   button.addEventListener("click", () => {
     state.language = button.dataset.language;
+    saveState();
+    render();
+  });
+});
+
+elements.learningTabs.forEach((button) => {
+  button.addEventListener("click", () => {
+    state.activeLearningTab = button.dataset.tab;
     saveState();
     render();
   });

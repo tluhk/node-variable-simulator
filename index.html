@@ -27,7 +27,10 @@
 
       <section class="workspace" aria-label="Simulator workspace" data-i18n-aria-label="aria.workspace">
         <aside class="scenario-panel" aria-label="Scenario selector" data-i18n-aria-label="aria.scenarioSelector">
-          <h2 data-i18n="labels.scenarios">Scenarios</h2>
+          <div class="scenario-panel-header">
+            <h2 data-i18n="labels.scenarios">Scenarios</h2>
+            <span id="scenarioProgress"></span>
+          </div>
           <div id="scenarioList" class="scenario-list"></div>
         </aside>
 
@@ -103,7 +106,10 @@
           </div>
 
           <section class="explanation" aria-live="polite">
-            <h3 id="stepTitle"></h3>
+            <div class="explanation-heading">
+              <h3 id="stepTitle"></h3>
+              <span id="changeBadge" class="change-badge"></span>
+            </div>
             <p id="stepExplanation"></p>
           </section>
         </section>
@@ -119,16 +125,34 @@
           </p>
         </div>
 
-        <section class="model-basics" aria-labelledby="model-basics-title">
+        <div class="learning-tabs" role="tablist" aria-label="Learning sections">
+          <button id="tabScenario" class="learning-tab active" type="button" data-tab="scenario" role="tab" aria-selected="true" aria-controls="panelScenario" data-i18n="tabs.scenario">Scenario</button>
+          <button id="tabModel" class="learning-tab" type="button" data-tab="model" role="tab" aria-selected="false" aria-controls="panelModel" data-i18n="tabs.model">Visual model</button>
+          <button id="tabReferences" class="learning-tab" type="button" data-tab="references" role="tab" aria-selected="false" aria-controls="panelReferences" data-i18n="tabs.references">References</button>
+        </div>
+
+        <section id="panelScenario" class="tab-panel active" role="tabpanel" aria-labelledby="tabScenario">
+          <section class="scenario-lesson" aria-labelledby="scenario-lesson-title">
+            <div class="lesson-card featured-lesson">
+              <p id="scenarioLessonKicker" class="eyebrow"></p>
+              <h3 id="scenarioLessonTitle"></h3>
+              <p id="scenarioLessonBody"></p>
+              <ul id="scenarioLessonBullets"></ul>
+            </div>
+
+            <div class="scenario-notes" aria-labelledby="scenario-notes-title">
+              <h3 id="scenario-notes-title" data-i18n="learning.inScenario">In this scenario</h3>
+              <div id="scenarioNotes" class="notes-list"></div>
+            </div>
+          </section>
+        </section>
+
+        <section id="panelModel" class="tab-panel model-basics" role="tabpanel" aria-labelledby="tabModel" hidden>
           <h3 id="model-basics-title" data-i18n="basics.title">Visual model basics</h3>
           <div class="model-grid">
             <article>
               <h4 data-i18n="basics.stack.title">Call stack</h4>
-              <p data-i18n="basics.stack.body">
-                The call stack shows the currently active execution contexts. In this
-                simulator, the newest function call appears above the older caller so
-                you can see which bindings are currently closest to execution.
-              </p>
+              <p data-i18n="basics.stack.body">The call stack shows the currently active execution contexts.</p>
               <ul>
                 <li data-i18n="basics.stack.item1">The global frame is the outer script-level context.</li>
                 <li data-i18n="basics.stack.item2">Function frames appear when a function is called.</li>
@@ -138,12 +162,7 @@
 
             <article>
               <h4 data-i18n="basics.frames.title">Frame types</h4>
-              <p data-i18n="basics.frames.body">
-                A frame is a conceptual container for local bindings. The label tells
-                you which scope the bindings belong to: `global frame`, a named
-                function frame such as `update frame`, or a returned closure's active
-                frame such as `inc frame`.
-              </p>
+              <p data-i18n="basics.frames.body">A frame is a conceptual container for local bindings.</p>
               <ul>
                 <li data-i18n="basics.frames.item1">Global bindings are visible from top-level code.</li>
                 <li data-i18n="basics.frames.item2">Function bindings include parameters and local variables.</li>
@@ -153,11 +172,7 @@
 
             <article>
               <h4 data-i18n="basics.heap.title">Heap</h4>
-              <p data-i18n="basics.heap.body">
-                The heap represents objects, arrays, functions, and retained closure
-                environments. Variables do not contain these structures directly in the
-                visual model; they hold reference values that point to heap entries.
-              </p>
+              <p data-i18n="basics.heap.body">The heap represents objects, arrays, functions, and retained closure environments.</p>
               <ul>
                 <li data-i18n="basics.heap.item1">Object and array properties are shown inside heap cards.</li>
                 <li data-i18n="basics.heap.item2">Multiple bindings can reference the same heap object.</li>
@@ -167,21 +182,7 @@
           </div>
         </section>
 
-        <section class="scenario-lesson" aria-labelledby="scenario-lesson-title">
-          <div class="lesson-card featured-lesson">
-            <p id="scenarioLessonKicker" class="eyebrow"></p>
-            <h3 id="scenarioLessonTitle"></h3>
-            <p id="scenarioLessonBody"></p>
-            <ul id="scenarioLessonBullets"></ul>
-          </div>
-
-          <div class="scenario-notes" aria-labelledby="scenario-notes-title">
-            <h3 id="scenario-notes-title" data-i18n="learning.inScenario">In this scenario</h3>
-            <div id="scenarioNotes" class="notes-list"></div>
-          </div>
-        </section>
-
-        <section class="references" aria-labelledby="references-title">
+        <section id="panelReferences" class="tab-panel references" role="tabpanel" aria-labelledby="tabReferences" hidden>
           <h3 id="references-title" data-i18n="references.title">References</h3>
           <ul>
             <li>
