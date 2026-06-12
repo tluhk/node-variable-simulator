@@ -1,7 +1,10 @@
 # Node.js Variable Memory Simulator
 
 An interactive, dependency-free simulator for explaining how JavaScript and
-Node.js variables behave in memory.
+Node.js variables behave in memory. The repository is designed to work as a
+small standalone learning object: learners can step through scenarios, inspect a
+conceptual stack/heap view, read a conceptual memory table, and review the
+included learning notes. The app supports both English and Estonian.
 
 The app visualizes:
 
@@ -12,6 +15,11 @@ The app visualizes:
 - function arguments
 - `const` binding behavior
 - closures retaining environments
+- variable shadowing
+- primitive and data structure reassignment
+
+The memory table is intentionally conceptual. It explains observable JavaScript
+behavior and should not be read as exact V8 or Node.js memory layout.
 
 ## Project Structure
 
@@ -62,3 +70,20 @@ That means:
 - reassigning a primitive parameter does not change the caller's variable
 - mutating an object through a copied reference changes the shared heap object
 - `const` prevents rebinding, but it does not freeze object contents
+
+The visual model uses three main ideas:
+
+- **Call stack**: active execution contexts, with the newest function call shown
+  above its caller.
+- **Frames**: conceptual containers for bindings, such as the global frame,
+  function frames, and closure-related frames.
+- **Heap**: conceptual storage for objects, arrays, functions, and retained
+  closure environments that bindings can reference.
+
+## References
+
+- [MDN: JavaScript data types and data structures](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Data_structures)
+- [MDN: `let`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/let)
+- [MDN: `const`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/const)
+- [MDN: Closures](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Closures)
+- [ECMAScript Language Specification](https://tc39.es/ecma262/)

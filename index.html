@@ -10,23 +10,24 @@
     <main class="app">
       <section class="intro" aria-labelledby="page-title">
         <div>
-          <p class="eyebrow">JavaScript memory model</p>
-          <h1 id="page-title">Node.js Variable Memory Simulator</h1>
-          <p class="lede">
+          <div class="topline">
+            <p class="eyebrow" data-i18n="intro.eyebrow">JavaScript memory model</p>
+            <div class="language-toggle" aria-label="Language selector">
+              <button class="language-option active" type="button" data-language="en">English</button>
+              <button class="language-option" type="button" data-language="et">Eesti</button>
+            </div>
+          </div>
+          <h1 id="page-title" data-i18n="intro.title">Node.js Variable Memory Simulator</h1>
+          <p class="lede" data-i18n="intro.lede">
             Step through small JavaScript examples and watch primitive values,
             object references, stack frames, and heap objects change.
           </p>
         </div>
-        <div class="legend" aria-label="Visual legend">
-          <span><i class="dot primitive"></i>Primitive value</span>
-          <span><i class="dot reference"></i>Reference</span>
-          <span><i class="dot heap"></i>Heap object</span>
-        </div>
       </section>
 
-      <section class="workspace" aria-label="Simulator workspace">
-        <aside class="scenario-panel" aria-label="Scenario selector">
-          <h2>Scenarios</h2>
+      <section class="workspace" aria-label="Simulator workspace" data-i18n-aria-label="aria.workspace">
+        <aside class="scenario-panel" aria-label="Scenario selector" data-i18n-aria-label="aria.scenarioSelector">
+          <h2 data-i18n="labels.scenarios">Scenarios</h2>
           <div id="scenarioList" class="scenario-list"></div>
         </aside>
 
@@ -36,39 +37,45 @@
               <p id="scenarioKicker" class="eyebrow"></p>
               <h2 id="scenarioTitle"></h2>
             </div>
-            <div class="controls" aria-label="Step controls">
-              <button id="prevBtn" type="button" aria-label="Previous step">Prev</button>
-              <button id="nextBtn" type="button" aria-label="Next step">Next</button>
-              <button id="resetBtn" type="button" aria-label="Reset scenario">Reset</button>
+            <div class="controls" aria-label="Step controls" data-i18n-aria-label="aria.stepControls">
+              <button id="prevBtn" type="button" aria-label="Previous step" data-i18n="buttons.prev" data-i18n-aria-label="aria.prev">Prev</button>
+              <button id="nextBtn" type="button" aria-label="Next step" data-i18n="buttons.next" data-i18n-aria-label="aria.next">Next</button>
+              <button id="resetBtn" type="button" aria-label="Reset scenario" data-i18n="buttons.reset" data-i18n-aria-label="aria.reset">Reset</button>
             </div>
           </header>
 
-          <div class="progress" aria-label="Scenario progress">
+          <div class="progress" aria-label="Scenario progress" data-i18n-aria-label="aria.progress">
             <div id="progressBar"></div>
+          </div>
+
+          <div class="legend" aria-label="Visual legend" data-i18n-aria-label="aria.legend">
+            <span><i class="dot primitive"></i><span data-i18n="legend.primitive">Primitive value</span></span>
+            <span><i class="dot reference"></i><span data-i18n="legend.reference">Reference</span></span>
+            <span><i class="dot heap"></i><span data-i18n="legend.heap">Heap object</span></span>
           </div>
 
           <div class="content-grid">
             <section class="code-panel" aria-labelledby="code-title">
               <div class="panel-heading">
-                <h3 id="code-title">Code</h3>
+                <h3 id="code-title" data-i18n="labels.code">Code</h3>
                 <span id="stepCounter"></span>
               </div>
               <pre><code id="codeBlock"></code></pre>
             </section>
 
-            <section class="memory-stage" aria-label="Memory visualization">
+            <section class="memory-stage" aria-label="Memory visualization" data-i18n-aria-label="aria.memoryVisualization">
               <div class="memory-column">
                 <div class="panel-heading">
-                  <h3>Call stack</h3>
-                  <span>bindings live here</span>
+                  <h3 data-i18n="labels.callStack">Call stack</h3>
+                  <span data-i18n="labels.bindingsLiveHere">bindings live here</span>
                 </div>
                 <div id="stackFrames" class="stack-frames"></div>
               </div>
 
               <div class="memory-column">
                 <div class="panel-heading">
-                  <h3>Heap</h3>
-                  <span>objects live here</span>
+                  <h3 data-i18n="labels.heap">Heap</h3>
+                  <span data-i18n="labels.objectsLiveHere">objects live here</span>
                 </div>
                 <div id="heapObjects" class="heap-objects"></div>
               </div>
@@ -76,17 +83,17 @@
 
             <section class="memory-table-panel" aria-labelledby="memory-table-title">
               <div class="panel-heading">
-                <h3 id="memory-table-title">Conceptual memory table</h3>
-                <span>not physical addresses</span>
+                <h3 id="memory-table-title" data-i18n="labels.memoryTable">Conceptual memory table</h3>
+                <span data-i18n="labels.notPhysicalAddresses">not physical addresses</span>
               </div>
               <div class="table-wrap">
                 <table class="memory-table">
                   <thead>
                     <tr>
-                      <th>Area</th>
-                      <th>Name</th>
-                      <th>Kind</th>
-                      <th>Holds</th>
+                      <th data-i18n="table.area">Area</th>
+                      <th data-i18n="table.name">Name</th>
+                      <th data-i18n="table.kind">Kind</th>
+                      <th data-i18n="table.holds">Holds</th>
                     </tr>
                   </thead>
                   <tbody id="memoryRows"></tbody>
@@ -99,6 +106,110 @@
             <h3 id="stepTitle"></h3>
             <p id="stepExplanation"></p>
           </section>
+        </section>
+      </section>
+
+      <section class="learning-guide" aria-labelledby="learning-title">
+        <div class="section-heading">
+          <p class="eyebrow" data-i18n="learning.eyebrow">Learning materials</p>
+          <h2 id="learning-title" data-i18n="learning.title">What this simulator teaches</h2>
+          <p data-i18n="learning.description">
+            Use these notes as a companion to the scenarios. The visuals are conceptual:
+            they explain observable JavaScript behavior, not exact V8 memory addresses.
+          </p>
+        </div>
+
+        <section class="model-basics" aria-labelledby="model-basics-title">
+          <h3 id="model-basics-title" data-i18n="basics.title">Visual model basics</h3>
+          <div class="model-grid">
+            <article>
+              <h4 data-i18n="basics.stack.title">Call stack</h4>
+              <p data-i18n="basics.stack.body">
+                The call stack shows the currently active execution contexts. In this
+                simulator, the newest function call appears above the older caller so
+                you can see which bindings are currently closest to execution.
+              </p>
+              <ul>
+                <li data-i18n="basics.stack.item1">The global frame is the outer script-level context.</li>
+                <li data-i18n="basics.stack.item2">Function frames appear when a function is called.</li>
+                <li data-i18n="basics.stack.item3">A frame disappears when that function returns.</li>
+              </ul>
+            </article>
+
+            <article>
+              <h4 data-i18n="basics.frames.title">Frame types</h4>
+              <p data-i18n="basics.frames.body">
+                A frame is a conceptual container for local bindings. The label tells
+                you which scope the bindings belong to: `global frame`, a named
+                function frame such as `update frame`, or a returned closure's active
+                frame such as `inc frame`.
+              </p>
+              <ul>
+                <li data-i18n="basics.frames.item1">Global bindings are visible from top-level code.</li>
+                <li data-i18n="basics.frames.item2">Function bindings include parameters and local variables.</li>
+                <li data-i18n="basics.frames.item3">Shadowed names can exist in multiple frames at once.</li>
+              </ul>
+            </article>
+
+            <article>
+              <h4 data-i18n="basics.heap.title">Heap</h4>
+              <p data-i18n="basics.heap.body">
+                The heap represents objects, arrays, functions, and retained closure
+                environments. Variables do not contain these structures directly in the
+                visual model; they hold reference values that point to heap entries.
+              </p>
+              <ul>
+                <li data-i18n="basics.heap.item1">Object and array properties are shown inside heap cards.</li>
+                <li data-i18n="basics.heap.item2">Multiple bindings can reference the same heap object.</li>
+                <li data-i18n="basics.heap.item3">Heap entries remain shown while some binding or closure still reaches them.</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section class="scenario-lesson" aria-labelledby="scenario-lesson-title">
+          <div class="lesson-card featured-lesson">
+            <p id="scenarioLessonKicker" class="eyebrow"></p>
+            <h3 id="scenarioLessonTitle"></h3>
+            <p id="scenarioLessonBody"></p>
+            <ul id="scenarioLessonBullets"></ul>
+          </div>
+
+          <div class="scenario-notes" aria-labelledby="scenario-notes-title">
+            <h3 id="scenario-notes-title" data-i18n="learning.inScenario">In this scenario</h3>
+            <div id="scenarioNotes" class="notes-list"></div>
+          </div>
+        </section>
+
+        <section class="references" aria-labelledby="references-title">
+          <h3 id="references-title" data-i18n="references.title">References</h3>
+          <ul>
+            <li>
+              <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Data_structures">
+                MDN: JavaScript data types and data structures
+              </a>
+            </li>
+            <li>
+              <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/let">
+                MDN: `let`
+              </a>
+            </li>
+            <li>
+              <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/const">
+                MDN: `const`
+              </a>
+            </li>
+            <li>
+              <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Closures">
+                MDN: Closures
+              </a>
+            </li>
+            <li>
+              <a href="https://tc39.es/ecma262/">
+                ECMAScript Language Specification
+              </a>
+            </li>
+          </ul>
         </section>
       </section>
     </main>
