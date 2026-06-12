@@ -517,6 +517,251 @@ const scenarios = [
         ]
       }
     ]
+  },
+  {
+    id: "mutation-vs-reassignment",
+    title: "Mutation vs reassignment",
+    kicker: "Change object or change binding",
+    summary: "Mutating a property changes the heap object. Reassigning the variable points it at a different object.",
+    code: [
+      "let user = { name: 'Ann' };",
+      "let saved = user;",
+      "user.name = 'Mari';",
+      "user = { name: 'Jaan' };"
+    ],
+    steps: [
+      {
+        line: 0,
+        title: "Create user object",
+        explanation: "user holds a reference to Object #1 on the heap.",
+        stack: [{ name: "global", bindings: [{ name: "user", value: ref("Object #1") }] }],
+        heap: [{ id: "Object #1", properties: [{ name: "name", value: primitive("'Ann'") }] }]
+      },
+      {
+        line: 1,
+        title: "Keep another reference",
+        explanation: "saved receives a copy of the reference, so both bindings point at Object #1.",
+        stack: [
+          {
+            name: "global",
+            bindings: [
+              { name: "user", value: ref("Object #1") },
+              { name: "saved", value: ref("Object #1") }
+            ]
+          }
+        ],
+        heap: [{ id: "Object #1", properties: [{ name: "name", value: primitive("'Ann'") }] }]
+      },
+      {
+        line: 2,
+        title: "Mutate the shared object",
+        explanation: "Changing user.name mutates Object #1. saved sees the same changed object.",
+        stack: [
+          {
+            name: "global",
+            bindings: [
+              { name: "user", value: ref("Object #1") },
+              { name: "saved", value: ref("Object #1") }
+            ]
+          }
+        ],
+        heap: [{ id: "Object #1", properties: [{ name: "name", value: primitive("'Mari'") }] }]
+      },
+      {
+        line: 3,
+        title: "Reassign user",
+        explanation: "user now points at Object #2. saved still points at Object #1, so the old object is still reachable.",
+        stack: [
+          {
+            name: "global",
+            bindings: [
+              { name: "user", value: ref("Object #2") },
+              { name: "saved", value: ref("Object #1") }
+            ]
+          }
+        ],
+        heap: [
+          { id: "Object #1", properties: [{ name: "name", value: primitive("'Mari'") }] },
+          { id: "Object #2", properties: [{ name: "name", value: primitive("'Jaan'") }] }
+        ]
+      }
+    ]
+  },
+  {
+    id: "shallow-copy",
+    title: "Reference copy vs shallow copy",
+    kicker: "Same object or new container",
+    summary: "Assignment copies a reference. Spread creates a new outer array, but nested objects are still shared.",
+    code: [
+      "const original = [{ id: 1 }];",
+      "const alias = original;",
+      "const copy = [...original];",
+      "copy.push({ id: 2 });",
+      "copy[0].id = 99;"
+    ],
+    steps: [
+      {
+        line: 0,
+        title: "Create array with nested object",
+        explanation: "original points at Array #1, and the first array slot points at Object #1.",
+        stack: [{ name: "global", bindings: [{ name: "original", value: ref("Array #1") }] }],
+        heap: [
+          { id: "Array #1", properties: [{ name: "0", value: ref("Object #1") }] },
+          { id: "Object #1", properties: [{ name: "id", value: primitive("1") }] }
+        ]
+      },
+      {
+        line: 1,
+        title: "Copy the array reference",
+        explanation: "alias points at the exact same Array #1 as original.",
+        stack: [
+          {
+            name: "global",
+            bindings: [
+              { name: "original", value: ref("Array #1") },
+              { name: "alias", value: ref("Array #1") }
+            ]
+          }
+        ],
+        heap: [
+          { id: "Array #1", properties: [{ name: "0", value: ref("Object #1") }] },
+          { id: "Object #1", properties: [{ name: "id", value: primitive("1") }] }
+        ]
+      },
+      {
+        line: 2,
+        title: "Make a shallow copy",
+        explanation: "copy points at a new Array #2, but its first slot still references the same Object #1.",
+        stack: [
+          {
+            name: "global",
+            bindings: [
+              { name: "original", value: ref("Array #1") },
+              { name: "alias", value: ref("Array #1") },
+              { name: "copy", value: ref("Array #2") }
+            ]
+          }
+        ],
+        heap: [
+          { id: "Array #1", properties: [{ name: "0", value: ref("Object #1") }] },
+          { id: "Array #2", properties: [{ name: "0", value: ref("Object #1") }] },
+          { id: "Object #1", properties: [{ name: "id", value: primitive("1") }] }
+        ]
+      },
+      {
+        line: 3,
+        title: "Mutate only the copied array",
+        explanation: "push changes Array #2 only. original and alias still point at Array #1.",
+        stack: [
+          {
+            name: "global",
+            bindings: [
+              { name: "original", value: ref("Array #1") },
+              { name: "alias", value: ref("Array #1") },
+              { name: "copy", value: ref("Array #2") }
+            ]
+          }
+        ],
+        heap: [
+          { id: "Array #1", properties: [{ name: "0", value: ref("Object #1") }] },
+          {
+            id: "Array #2",
+            properties: [
+              { name: "0", value: ref("Object #1") },
+              { name: "1", value: ref("Object #2") }
+            ]
+          },
+          { id: "Object #1", properties: [{ name: "id", value: primitive("1") }] },
+          { id: "Object #2", properties: [{ name: "id", value: primitive("2") }] }
+        ]
+      },
+      {
+        line: 4,
+        title: "Mutate the shared nested object",
+        explanation: "copy[0] and original[0] both reference Object #1, so changing id affects the nested object seen from both arrays.",
+        stack: [
+          {
+            name: "global",
+            bindings: [
+              { name: "original", value: ref("Array #1") },
+              { name: "alias", value: ref("Array #1") },
+              { name: "copy", value: ref("Array #2") }
+            ]
+          }
+        ],
+        heap: [
+          { id: "Array #1", properties: [{ name: "0", value: ref("Object #1") }] },
+          {
+            id: "Array #2",
+            properties: [
+              { name: "0", value: ref("Object #1") },
+              { name: "1", value: ref("Object #2") }
+            ]
+          },
+          { id: "Object #1", properties: [{ name: "id", value: primitive("99") }] },
+          { id: "Object #2", properties: [{ name: "id", value: primitive("2") }] }
+        ]
+      }
+    ]
+  },
+  {
+    id: "nested-references",
+    title: "Nested object references",
+    kicker: "References inside heap objects",
+    summary: "Object properties can hold references too, so sharing can happen through nested objects.",
+    code: [
+      "const user = { profile: { name: 'Ann' } };",
+      "const profile = user.profile;",
+      "profile.name = 'Mari';"
+    ],
+    steps: [
+      {
+        line: 0,
+        title: "Create nested objects",
+        explanation: "user points at Object #1. Its profile property points at a separate heap object, Object #2.",
+        stack: [{ name: "global", bindings: [{ name: "user", value: ref("Object #1") }] }],
+        heap: [
+          { id: "Object #1", properties: [{ name: "profile", value: ref("Object #2") }] },
+          { id: "Object #2", properties: [{ name: "name", value: primitive("'Ann'") }] }
+        ]
+      },
+      {
+        line: 1,
+        title: "Copy nested reference",
+        explanation: "profile receives the reference stored in user.profile, so it points directly at Object #2.",
+        stack: [
+          {
+            name: "global",
+            bindings: [
+              { name: "user", value: ref("Object #1") },
+              { name: "profile", value: ref("Object #2") }
+            ]
+          }
+        ],
+        heap: [
+          { id: "Object #1", properties: [{ name: "profile", value: ref("Object #2") }] },
+          { id: "Object #2", properties: [{ name: "name", value: primitive("'Ann'") }] }
+        ]
+      },
+      {
+        line: 2,
+        title: "Mutate nested object",
+        explanation: "profile.name changes Object #2. user.profile points at that same changed object.",
+        stack: [
+          {
+            name: "global",
+            bindings: [
+              { name: "user", value: ref("Object #1") },
+              { name: "profile", value: ref("Object #2") }
+            ]
+          }
+        ],
+        heap: [
+          { id: "Object #1", properties: [{ name: "profile", value: ref("Object #2") }] },
+          { id: "Object #2", properties: [{ name: "name", value: primitive("'Mari'") }] }
+        ]
+      }
+    ]
   }
 ];
 
@@ -640,6 +885,54 @@ const learningMaterials = {
       ["Watch reassignment", "list = ['new'] points list at Array #2."],
       ["Key takeaway", "Mutating an object and reassigning a binding are different operations."]
     ]
+  },
+  "mutation-vs-reassignment": {
+    kicker: "Mutation and reassignment",
+    title: "Changing an object is different from changing a binding",
+    body:
+      "This scenario separates two operations that often look similar: mutating a property on the existing heap object and reassigning a variable to a new heap object.",
+    bullets: [
+      "user.name changes Object #1 itself.",
+      "user = { name: 'Jaan' } changes only where user points.",
+      "saved keeps the old object reachable after user is reassigned."
+    ],
+    notes: [
+      ["Watch Object #1", "Its name changes from 'Ann' to 'Mari' during mutation."],
+      ["Watch user", "It later points away from Object #1 and toward Object #2."],
+      ["Key takeaway", "Mutation changes an object; reassignment changes a binding."]
+    ]
+  },
+  "shallow-copy": {
+    kicker: "Shallow copy",
+    title: "Spread copies the outer container, not nested objects",
+    body:
+      "This scenario contrasts assignment with a shallow array copy. The copied array is new, but the object inside it is still shared.",
+    bullets: [
+      "alias and original point at the same Array #1.",
+      "copy points at a new Array #2.",
+      "Both arrays still contain a reference to the same Object #1."
+    ],
+    notes: [
+      ["Watch the arrays", "push changes Array #2 but not Array #1."],
+      ["Watch Object #1", "copy[0].id changes the nested object shared by both arrays."],
+      ["Key takeaway", "Shallow copy breaks outer-container sharing only."]
+    ]
+  },
+  "nested-references": {
+    kicker: "Nested references",
+    title: "References can live inside objects too",
+    body:
+      "This scenario shows that heap objects can contain reference values in their properties. Sharing can happen through a nested property, not only through top-level variables.",
+    bullets: [
+      "user points at Object #1.",
+      "Object #1.profile points at Object #2.",
+      "profile copies that nested reference and can mutate Object #2."
+    ],
+    notes: [
+      ["Watch profile", "The top-level profile binding points directly at Object #2."],
+      ["Watch user.profile", "It still points at the same Object #2."],
+      ["Key takeaway", "Nested objects are separate heap objects connected by references."]
+    ]
   }
 };
 
@@ -755,6 +1048,54 @@ const learningMaterialsEt = {
       ["Vaata ümbermääramist", "list = ['new'] paneb list-i osutama Array #2-le."],
       ["Põhiidee", "Objekti muutmine ja sideme ümbermääramine on erinevad operatsioonid."]
     ]
+  },
+  "mutation-vs-reassignment": {
+    kicker: "Muutmine ja ümbermääramine",
+    title: "Objekti muutmine erineb sideme muutmisest",
+    body:
+      "See stsenaarium eraldab kaks operatsiooni, mis võivad sarnased paista: olemasoleva heap-objekti omaduse muutmine ja muutuja suunamine uuele heap-objektile.",
+    bullets: [
+      "user.name muudab Object #1 sisu.",
+      "user = { name: 'Jaan' } muudab ainult seda, kuhu user osutab.",
+      "saved hoiab vana objekti kättesaadavana ka pärast user ümbermääramist."
+    ],
+    notes: [
+      ["Vaata Object #1", "Selle name muutub väärtusest 'Ann' väärtuseks 'Mari'."],
+      ["Vaata user sidet", "Hiljem ei osuta see enam Object #1-le, vaid Object #2-le."],
+      ["Põhiidee", "Muutmine muudab objekti; ümbermääramine muudab sidet."]
+    ]
+  },
+  "shallow-copy": {
+    kicker: "Pindmine koopia",
+    title: "Spread kopeerib välise konteineri, mitte pesastatud objektid",
+    body:
+      "See stsenaarium võrdleb omistamist pindmise massiivikoopiaga. Kopeeritud massiiv on uus, aga selle sees olev objekt on endiselt jagatud.",
+    bullets: [
+      "alias ja original osutavad samale Array #1-le.",
+      "copy osutab uuele Array #2-le.",
+      "Mõlemad massiivid sisaldavad endiselt viidet samale Object #1-le."
+    ],
+    notes: [
+      ["Vaata massiive", "push muudab Array #2 sisu, kuid mitte Array #1 sisu."],
+      ["Vaata Object #1", "copy[0].id muudab pesastatud objekti, mida mõlemad massiivid jagavad."],
+      ["Põhiidee", "Pindmine koopia katkestab ainult välise konteineri jagamise."]
+    ]
+  },
+  "nested-references": {
+    kicker: "Pesastatud viited",
+    title: "Viited võivad asuda ka objektide sees",
+    body:
+      "See stsenaarium näitab, et heap-objektide omadused võivad hoida viiteväärtusi. Jagamine võib tekkida pesastatud omaduse kaudu, mitte ainult tipptaseme muutujate kaudu.",
+    bullets: [
+      "user osutab Object #1-le.",
+      "Object #1.profile osutab Object #2-le.",
+      "profile kopeerib selle pesastatud viite ja saab Object #2 muuta."
+    ],
+    notes: [
+      ["Vaata profile sidet", "Tipptaseme profile side osutab otse Object #2-le."],
+      ["Vaata user.profile", "See osutab endiselt samale Object #2-le."],
+      ["Põhiidee", "Pesastatud objektid on eraldi heap-objektid, mida ühendavad viited."]
+    ]
   }
 };
 
@@ -842,6 +1183,39 @@ const scenarioTranslations = {
         ["Kopeeri viide", "alias saab viite koopia. list ja alias osutavad nüüd samale heap-is olevale massiivile."],
         ["Muuda jagatud massiivi", "push muudab Array #1 sisu. Nii list kui alias näevad lisatud elementi, sest mõlemad viited osutavad samale heap-objektile."],
         ["Määra andmestruktuuri side ümber", "list ümbermääramine paneb selle osutama uuele massiivile. alias osutab endiselt Array #1-le, seega vana massiiv on veel kättesaadav."]
+      ]
+    },
+    "mutation-vs-reassignment": {
+      title: "Muutmine vs ümbermääramine",
+      kicker: "Muuda objekti või muuda sidet",
+      summary: "Omaduse muutmine muudab heap-objekti. Muutuja ümbermääramine paneb selle osutama teisele objektile.",
+      steps: [
+        ["Loo user objekt", "user hoiab viidet heap-is olevale Object #1-le."],
+        ["Hoia teine viide", "saved saab viite koopia, seega mõlemad sidemed osutavad Object #1-le."],
+        ["Muuda jagatud objekti", "user.name muutmine muudab Object #1 sisu. saved näeb sama muudetud objekti."],
+        ["Määra user ümber", "user osutab nüüd Object #2-le. saved osutab endiselt Object #1-le, seega vana objekt on veel kättesaadav."]
+      ]
+    },
+    "shallow-copy": {
+      title: "Viite koopia vs pindmine koopia",
+      kicker: "Sama objekt või uus konteiner",
+      summary: "Omistamine kopeerib viite. Spread loob uue välise massiivi, kuid pesastatud objektid jäävad jagatuks.",
+      steps: [
+        ["Loo massiiv pesastatud objektiga", "original osutab Array #1-le ja massiivi esimene koht osutab Object #1-le."],
+        ["Kopeeri massiivi viide", "alias osutab täpselt samale Array #1-le nagu original."],
+        ["Tee pindmine koopia", "copy osutab uuele Array #2-le, kuid selle esimene koht viitab endiselt samale Object #1-le."],
+        ["Muuda ainult kopeeritud massiivi", "push muudab ainult Array #2 sisu. original ja alias osutavad endiselt Array #1-le."],
+        ["Muuda jagatud pesastatud objekti", "copy[0] ja original[0] viitavad mõlemad Object #1-le, seega id muutmine mõjutab mõlemast massiivist nähtavat pesastatud objekti."]
+      ]
+    },
+    "nested-references": {
+      title: "Pesastatud objektiviited",
+      kicker: "Viited heap-objektide sees",
+      summary: "Objekti omadused võivad samuti hoida viiteid, seega jagamine võib toimuda pesastatud objektide kaudu.",
+      steps: [
+        ["Loo pesastatud objektid", "user osutab Object #1-le. Selle profile omadus osutab eraldi heap-objektile Object #2."],
+        ["Kopeeri pesastatud viide", "profile saab viite, mis on salvestatud user.profile omadusesse, seega osutab see otse Object #2-le."],
+        ["Muuda pesastatud objekti", "profile.name muudab Object #2 sisu. user.profile osutab samale muudetud objektile."]
       ]
     }
   }

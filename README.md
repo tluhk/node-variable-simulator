@@ -17,6 +17,9 @@ The app visualizes:
 - closures retaining environments
 - variable shadowing
 - primitive and data structure reassignment
+- mutation versus reassignment
+- reference copy versus shallow copy
+- nested object references
 
 The memory table is intentionally conceptual. It explains observable JavaScript
 behavior and should not be read as exact V8 or Node.js memory layout.
